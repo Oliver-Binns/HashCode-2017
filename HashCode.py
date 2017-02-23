@@ -130,8 +130,8 @@ for file in os.listdir(directory):
     if file.endswith(".in"):
         f = open(os.path.join(directory, file), "r")
 
-        if file != "videos_worth_spreading.in":
-            continue
+        #if file != "videos_worth_spreading.in":
+        #    continue
 
         data_center_config = f.readline().split(" ")
 
