@@ -28,27 +28,49 @@ class DataCentre(object):
             endpoint = self.end_points[request_data["endpoint_id"]]
             video = self.videos[request_data["video_id"]]
 
-            for j in range(request_data["no_requests"]):
-                endpoint.add_request(video)
+            endpoint.add_request(video, request_data["no_requests"])
 
-    def output(self):
-        target = open("output.out", 'w')
+    def fill_caches(self):
+        # Runs algorithm here...
+        for i in range(len(self.end_points)):
+            endpoint = self.end_points[i]
+            endpoint.video_requests.sort(key=lambda x: x.no_requests, reverse=True)
+            endpoint.cache_connections.sort(key=lambda x: x.latency)
+            for j in range(len(endpoint.video_requests)):
+                request = endpoint.video_requests[j]
+                for k in range(len(endpoint.cache_connections)):
+                    cache = endpoint.cache_connections[k].cache
+                    if cache.contains(request.video):
+                        break
+                    elif cache.can_add(request.video):
+                        cache.add_video(request.video)
+                        break
+
+    def output(self, filename):
+        target = open(filename + ".out", 'w')
         target.write(str(len(self.cache_servers)) + "\n")
         for i in range(len(self.cache_servers)):
             target.write(self.cache_servers[i].get_output() + "\n")
+        target.close()
 
 
 class Endpoint(object):
     def __init__(self, latency):
         self.latency = latency
-        self.cache_connections = {}
+        self.cache_connections = []
         self.video_requests = []
 
     def add_connection(self, cache, latency):
-        self.cache_connections[cache] = latency
+        self.cache_connections.append(CacheConnection(cache, latency))
 
-    def add_request(self, video):
-        self.video_requests.append(video)
+    def add_request(self, video, no_requests):
+        self.video_requests.append(VideoRequest(video, no_requests))
+
+
+class VideoRequest(object):
+    def __init__(self, video, no_requests):
+        self.video = video
+        self.no_requests = no_requests
 
 
 class Video(object):
@@ -57,11 +79,23 @@ class Video(object):
         self.size = int(size)
 
 
+class CacheConnection(object):
+    def __init__(self, cache, latency):
+        self.cache = cache
+        self.latency = latency
+
+
 class CacheServer(object):
     def __init__(self, id, max_size):
         self.id = id
         self.max_size = max_size
         self.videos = []
+
+    def contains(self, video):
+        return video in self.videos
+
+    def can_add(self, video):
+        return self.get_size() + video.size <= self.max_size
 
     def get_size(self):
         size = 0
@@ -70,60 +104,62 @@ class CacheServer(object):
         return size
 
     def add_video(self, video):
-        if self.get_size() + video.size <= self.max_size:
+        if self.can_add(video):
             self.videos.append(video)
 
     def get_output(self):
         output_string = str(self.id)
         for i in range(len(self.videos)):
-            output_string += " " + self.videos[i].video_id
+            output_string += " " + str(self.videos[i].video_id)
         return output_string
 
 
 # For each file.. in the data directory
 directory = "data"
-# for file in os.listdir(directory):
-#    if file.endswith(".in"):
-f = open(os.path.join(directory, "me_at_the_zoo.in"), "r")
-data_center_config = f.readline().split(" ")
+for file in os.listdir(directory):
+    if file.endswith(".in"):
+        f = open(os.path.join(directory, file), "r")
+        data_center_config = f.readline().split(" ")
 
-video_sizes = f.readline().split(" ")
+        video_sizes = f.readline().split(" ")
 
-# End Point Video Requests
-endpoints = []
-for i in range(int(data_center_config[1])): # For each of the end points..
-    endpoint_data = f.readline().split(" ")
-    endpoint_latency = endpoint_data[0]
-    no_cache_connections = endpoint_data[1]
+        # End Point Video Requests
+        endpoints = []
+        for i in range(int(data_center_config[1])): # For each of the end points..
+            endpoint_data = f.readline().split(" ")
+            endpoint_latency = endpoint_data[0]
+            no_cache_connections = endpoint_data[1]
 
-    cache_connections = []  # Fetch each cache
-    for j in range(int(no_cache_connections)):
-        cache_data = f.readline().split(" ")
+            cache_connections = []  # Fetch each cache
+            for j in range(int(no_cache_connections)):
+                cache_data = f.readline().split(" ")
 
-        cache_id = cache_data[0]
-        cache_latency = cache_data[1]
+                cache_id = cache_data[0]
+                cache_latency = cache_data[1]
 
-        cache_connections.append({"id": int(cache_id), "latency": int(cache_latency)})
-    endpoints.append({"latency": int(endpoint_latency), "cache_connections": cache_connections})
+                cache_connections.append({"id": int(cache_id), "latency": int(cache_latency)})
+            endpoints.append({"latency": int(endpoint_latency), "cache_connections": cache_connections})
 
-line = f.readline()
-requests = []
-while line != "":
-    request_data = line.split(" ")
-    requests.append({"video_id": int(request_data[0]), "endpoint_id": int(request_data[1]), "no_requests": int(request_data[2])})
+        line = f.readline()
+        requests = []
+        while line != "":
+            request_data = line.split(" ")
+            requests.append({"video_id": int(request_data[0]), "endpoint_id": int(request_data[1]), "no_requests": int(request_data[2])})
 
-    line = f.readline()
+            line = f.readline()
 
-f.close()
+        f.close()
 
-data_center = DataCentre(
-    int(data_center_config[3]),     # Number of Cache Servers
-    int(data_center_config[4]),     # Size of Cache Server
-    int(data_center_config[2]),     # Number of Request Descriptions
-    video_sizes,                    # Size of Videos
-    endpoints,
-    requests
-)
+        data_center = DataCentre(
+            int(data_center_config[3]),     # Number of Cache Servers
+            int(data_center_config[4]),     # Size of Cache Server
+            int(data_center_config[2]),     # Number of Request Descriptions
+            video_sizes,                    # Size of Videos
+            endpoints,
+            requests
+        )
+        data_center.fill_caches()
+        data_center.output(file)
+        print "first file done"
 
-data_center.output()
 print "finished"
