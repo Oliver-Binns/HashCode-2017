@@ -1,6 +1,5 @@
 import os
 
-
 class DataCentre(object):
     def __init__(self, no_cache_servers, cache_server_size, no_request_descriptions, video_sizes, endpoints, requests):
         self.request_descriptions = no_request_descriptions
@@ -31,6 +30,10 @@ class DataCentre(object):
 
             for j in range(request_data["no_requests"]):
                 endpoint.add_request(video)
+
+    def output(self):
+        target = open("output.out", 'w')
+        target.write(str(len(self.cache_servers)))
 
 
 class Endpoint(object):
@@ -111,3 +114,6 @@ data_center = DataCentre(
     endpoints,
     requests
 )
+
+data_center.output()
+print "finished"
