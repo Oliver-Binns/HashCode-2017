@@ -74,7 +74,7 @@ class CacheServer(object):
 directory = "data"
 # for file in os.listdir(directory):
 #    if file.endswith(".in"):
-f = open(os.path.join(directory, "kittens.in"), "r")
+f = open(os.path.join(directory, "me_at_the_zoo.in"), "r")
 data_center_config = f.readline().split(" ")
 
 video_sizes = f.readline().split(" ")
