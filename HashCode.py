@@ -31,6 +31,12 @@ class DataCentre(object):
             for j in range(request_data["no_requests"]):
                 endpoint.add_request(video)
 
+    def fill_caches(self):
+        # Runs algorithm here...
+        for i in range(len(self.end_points)):
+            for ii in range(len(self.end_points[i].video_requests)):
+                if self.end_points[i].video_requests[ii]
+
     def output(self):
         target = open("output.out", 'w')
         target.write(str(len(self.cache_servers)) + "\n")
@@ -124,6 +130,8 @@ data_center = DataCentre(
     endpoints,
     requests
 )
-
+data_center.fill_caches()
 data_center.output()
 print "finished"
+
+
