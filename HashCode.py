@@ -117,9 +117,9 @@ while line != "":
 f.close()
 
 data_center = DataCentre(
-    int(data_center_config[2]),     # Number of Request Descriptions
     int(data_center_config[3]),     # Number of Cache Servers
     int(data_center_config[4]),     # Size of Cache Server
+    int(data_center_config[2]),     # Number of Request Descriptions
     video_sizes,                    # Size of Videos
     endpoints,
     requests
