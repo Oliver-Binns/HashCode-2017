@@ -82,6 +82,7 @@ video_sizes = f.readline().split(" ")
 # End Point Video Requests
 endpoints = []
 for i in range(int(data_center_config[1])): # For each of the end points..
+    print i
     endpoint_data = f.readline().split(" ")
     endpoint_latency = endpoint_data[0]
     no_cache_connections = endpoint_data[1]
