@@ -6,7 +6,7 @@ class DataCentre(object):
 
         self.cache_servers = []
         for i in range(no_cache_servers):
-            self.cache_servers.append(CacheServer(cache_server_size))
+            self.cache_servers.append(CacheServer(i, cache_server_size))
 
         self.videos = []
         for i in range(len(video_sizes)):
@@ -33,7 +33,9 @@ class DataCentre(object):
 
     def output(self):
         target = open("output.out", 'w')
-        target.write(str(len(self.cache_servers)))
+        target.write(str(len(self.cache_servers)) + "\n")
+        for i in range(len(self.cache_servers)):
+            target.write(self.cache_servers[i].get_output() + "\n")
 
 
 class Endpoint(object):
@@ -56,7 +58,8 @@ class Video(object):
 
 
 class CacheServer(object):
-    def __init__(self, max_size):
+    def __init__(self, id, max_size):
+        self.id = id
         self.max_size = max_size
         self.videos = []
 
@@ -64,10 +67,17 @@ class CacheServer(object):
         size = 0
         for i in range(len(self.videos)):
             size += self.videos[i].size
+        return size
 
     def add_video(self, video):
         if self.get_size() + video.size <= self.max_size:
             self.videos.append(video)
+
+    def get_output(self):
+        output_string = str(self.id)
+        for i in range(len(self.videos)):
+            output_string += " " + self.videos[i].video_id
+        return output_string
 
 
 # For each file.. in the data directory
@@ -82,7 +92,6 @@ video_sizes = f.readline().split(" ")
 # End Point Video Requests
 endpoints = []
 for i in range(int(data_center_config[1])): # For each of the end points..
-    print i
     endpoint_data = f.readline().split(" ")
     endpoint_latency = endpoint_data[0]
     no_cache_connections = endpoint_data[1]
