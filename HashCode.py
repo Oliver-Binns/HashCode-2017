@@ -37,8 +37,10 @@ class DataCentre(object):
             endpoint.cache_connections.sort(key=lambda x: x.latency)
 
         self.fill_range(0, 0.05)
-        self.fill_range(0.05, 0.25)
-        self.fill_range(0.25, 0.5)
+        self.fill_range(0.05, 0.10)
+        self.fill_range(0.10, 0.20)
+        self.fill_range(0.20, 0.30)
+        self.fill_range(0.30, 0.50)
         self.fill_range(0.5, 1)
 
     def fill_range(self, start, finish):
@@ -130,8 +132,8 @@ for file in os.listdir(directory):
     if file.endswith(".in"):
         f = open(os.path.join(directory, file), "r")
 
-        #if file != "videos_worth_spreading.in":
-        #    continue
+        if file == "kittens.in":
+            continue
 
         data_center_config = f.readline().split(" ")
 
