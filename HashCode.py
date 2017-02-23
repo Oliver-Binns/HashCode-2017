@@ -1,4 +1,4 @@
-import os
+import os, math
 
 class DataCentre(object):
     def __init__(self, no_cache_servers, cache_server_size, no_request_descriptions, video_sizes, endpoints, requests):
@@ -31,12 +31,22 @@ class DataCentre(object):
             endpoint.add_request(video, request_data["no_requests"])
 
     def fill_caches(self):
-        # Runs algorithm here...
         for i in range(len(self.end_points)):
             endpoint = self.end_points[i]
             endpoint.video_requests.sort(key=lambda x: x.no_requests, reverse=True)
             endpoint.cache_connections.sort(key=lambda x: x.latency)
-            for j in range(len(endpoint.video_requests)):
+
+        self.fill_range(0, 0.05)
+        self.fill_range(0.05, 0.25)
+        self.fill_range(0.25, 0.5)
+        self.fill_range(0.5, 1)
+
+    def fill_range(self, start, finish):
+        # Runs algorithm here...
+        for i in range(len(self.end_points)):
+            endpoint = self.end_points[i]
+            num_videos = len(endpoint.video_requests)
+            for j in range(int(math.floor(num_videos * start)), int(math.ceil(num_videos * finish))):
                 request = endpoint.video_requests[j]
                 for k in range(len(endpoint.cache_connections)):
                     cache = endpoint.cache_connections[k].cache
@@ -119,6 +129,10 @@ directory = "data"
 for file in os.listdir(directory):
     if file.endswith(".in"):
         f = open(os.path.join(directory, file), "r")
+
+        if file != "videos_worth_spreading.in":
+            continue
+
         data_center_config = f.readline().split(" ")
 
         video_sizes = f.readline().split(" ")
