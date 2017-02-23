@@ -22,8 +22,9 @@ class DataCentre(object):
             for j in range(len(connections)):
                 cache_id = connections[j]["id"]
                 endpoint_obj.add_connection(self.cache_servers[cache_id], connections[j]["latency"])
+            self.end_points.append(endpoint_obj)
 
-        for i in range(requests):
+        for i in range(len(requests)):
             request_data = requests[i]
             endpoint = self.end_points[request_data["endpoint_id"]]
             video = self.videos[request_data["video_id"]]
